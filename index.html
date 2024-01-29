@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kerapatan Bangunan Terhadap Resiko Banjir</title>
+    <link rel="stylesheet" href="library/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="library/leaflet/leaflet.js"></script>
+    <script src="library/leaflet-providers-master/leaflet-providers.js"></script>
+    <script src="library/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="map">
+        <script>
+            var map = L.map('map').setView([-7.808974681603707, 110.46757482522906], 13);
+
+            var baseLayers = {
+                'Esri WorldTopoMap': L.tileLayer.provider('Esri.WorldTopoMap'),
+                'Esri WorldImagery': L.tileLayer.provider('Esri.WorldImagery').addTo(map),
+                'OSM Default': L.tileLayer.provider('OpenStreetMap.DE'),
+                'OSM France': L.tileLayer.provider('OpenStreetMap.France')
+            };
+
+
+            /* Memanggil Layer Rawan Banjir */
+            var Rasterpolygon = L.geoJson(null, {
+                style: function(feature) {
+                    return {
+                        color: "black",
+                        fillColor: KlasKerawanan[feature.properties.Kerawanan],
+                        weight: 0.3,
+                        opacity: 0,
+                        fillOpacity: 0.7
+                    };
+                },
+                onEachFeature: function( feature, layer ){
+                    layer.bindPopup(
+                        "Klas Kerawanan : " + "<left>" + feature.properties.Kerawanan + "</left>" + "<br>" +
+                        "Luas :" + "<left>" + feature.properties.Luas + "</left>" + " m2"
+                        )
+                }
+            });
+            $.getJSON("data/Banjir.json", function(data) {
+                Rasterpolygon.addData(data);
+            });
+
+			/* Merubah Tampilan Warna Berdasar Atribut Klas Banjir */
+			var KlasKerawanan = {
+				"Sangat Rawan":"#d3f0f2",
+				"Rawan":"#9bd1e8",
+				"Cukup Rawan":"#6c76cc",
+				"Aman":"#1326d1",
+				"Sangat Aman":"#0b0a5c"
+			};
+
+            var mapLayers = {
+                'Kerapatan Bangunan Terhadap Resiko Banjir': Rasterpolygon
+            };
+
+            L.control.layers(baseLayers, mapLayers).addTo(map);
+        </script>
+    </div>
+</body>
+
+</html>
